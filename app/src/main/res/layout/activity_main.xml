@@ -5,7 +5,7 @@
     <data>
         <variable
             name="vm"
-            type="com.karvinok.movies.ui.viewModel.MainVM" />
+            type="com.karvinok.sample.ui.viewModel.MainVM" />
     </data>
 
     <FrameLayout
