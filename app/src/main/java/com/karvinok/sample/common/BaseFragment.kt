@@ -1,22 +1,22 @@
 package com.karvinok.sample.common
 
 import android.os.Bundle
-import android.view.LayoutInflater
 import android.view.View
-import android.view.ViewGroup
-import androidx.databinding.DataBindingUtil
-import androidx.databinding.ViewDataBinding
+import androidx.annotation.LayoutRes
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.observe
 import androidx.navigation.fragment.findNavController
-import com.karvinok.sample.BR
+import androidx.viewbinding.ViewBinding
+import com.karvinok.sample.R
 import io.reactivex.disposables.CompositeDisposable
 import java.lang.Exception
 
-abstract class BaseFragment<B: ViewDataBinding>: Fragment(), ViewInitializer, DisposableProcessor{
-    protected lateinit var binding : B
+abstract class BaseFragment(@LayoutRes id : Int): Fragment(id),
+    ViewInitializer, DisposableProcessor {
+
     protected abstract val viewModel : BaseViewModel
+    protected abstract val binding: ViewBinding
 
     protected var dp = 1f
 
@@ -26,28 +26,11 @@ abstract class BaseFragment<B: ViewDataBinding>: Fragment(), ViewInitializer, Di
         super.onActivityCreated(savedInstanceState)
 
         initData()
-        performDataBinding()
         initViews()
-
+        initDpValue()
         subscribeUI()
         subscribeBaseUI()
     }
-
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
-    ): View? {
-        binding = DataBindingUtil.inflate(inflater, createLayout(), container, false)
-        return binding.root
-    }
-
-    private fun performDataBinding() {
-        binding.setVariable(BR.vm, viewModel)
-        binding.lifecycleOwner = this
-        binding.executePendingBindings()
-
-        dp = resources.displayMetrics.density
-    }
-
 
     fun subscribeBaseUI(){
         addDispose {
@@ -64,6 +47,7 @@ abstract class BaseFragment<B: ViewDataBinding>: Fragment(), ViewInitializer, Di
                 }
             }
         }
+        observe(viewModel.isLoading, ::showLoading)
     }
 
     inline fun <T> Fragment.observe(liveData: LiveData<T>, crossinline function: (T) -> Unit) {
@@ -74,8 +58,18 @@ abstract class BaseFragment<B: ViewDataBinding>: Fragment(), ViewInitializer, Di
         liveData.observe(viewLifecycleOwner) { function.invoke(it) }
     }
 
+    override fun initDpValue(){
+        dp = resources.displayMetrics.density
+    }
+
     open fun popBackStack() {
         findNavController().popBackStack()
+    }
+
+    open fun showLoading(isShow: Boolean){
+        binding.root.findViewById<View>(R.id.view_progress)?.let {
+            it.visibility = if (isShow) View.VISIBLE else View.GONE
+        }
     }
 
     override fun onStart() {
@@ -100,6 +94,8 @@ abstract class BaseFragment<B: ViewDataBinding>: Fragment(), ViewInitializer, Di
 
     override fun onDestroy() {
         super.onDestroy()
+        viewModel.onDestroy()
         disposable.clear()
     }
+
 }

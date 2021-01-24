@@ -7,8 +7,5 @@ dependencies {
     implementation rootProject.ext.domainDeps
     testImplementation rootProject.ext.domainTestDeps
     annotationProcessor rootProject.ext.kaptDeps
-
-
-
 }
 

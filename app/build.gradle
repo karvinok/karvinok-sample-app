@@ -5,13 +5,13 @@ apply plugin: 'kotlin-kapt'
 apply plugin: 'koin'
 
 android {
-    compileSdkVersion 29
+    compileSdkVersion 30
     buildToolsVersion "29.0.3"
 
     defaultConfig {
         applicationId "com.example.myapplication"
         minSdkVersion 23
-        targetSdkVersion 29
+        targetSdkVersion 30
         versionCode 1
         versionName "1.0"
 
@@ -27,6 +27,10 @@ android {
         jvmTarget = JavaVersion.VERSION_1_8
     }
 
+    buildFeatures {
+        viewBinding true
+    }
+
     buildTypes {
         debug{
             minifyEnabled false
@@ -37,10 +41,6 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
 
-    }
-
-    dataBinding {
-        enabled = true
     }
 }
 

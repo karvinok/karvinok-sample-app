@@ -2,14 +2,12 @@ package com.karvinok.sample.common
 
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
-import androidx.databinding.DataBindingUtil
-import androidx.databinding.ViewDataBinding
-import com.karvinok.sample.BR
+import androidx.viewbinding.ViewBinding
 import io.reactivex.disposables.CompositeDisposable
 
-abstract class BaseActivity<B : ViewDataBinding> : AppCompatActivity(), ViewInitializer,
+abstract class BaseActivity : AppCompatActivity(), ViewInitializer,
     DisposableProcessor {
-    protected lateinit var binding: B
+    protected abstract val binding: ViewBinding
     protected abstract val viewModel: BaseViewModel
 
     protected var dp = Float.MAX_VALUE
@@ -18,25 +16,13 @@ abstract class BaseActivity<B : ViewDataBinding> : AppCompatActivity(), ViewInit
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        performDataBinding()
+        setContentView(binding.root)
         initData()
         initViews()
+        initDpValue()
         subscribeUI()
         subscribeBaseUI()
     }
-
-    private fun performDataBinding() {
-        binding = DataBindingUtil.setContentView(this, createLayout())
-        binding.apply {
-            setVariable(BR.vm, viewModel)
-            lifecycleOwner = this@BaseActivity
-            setContentView(root)
-            executePendingBindings()
-        }
-
-        dp = resources.displayMetrics.density
-    }
-
 
     fun subscribeBaseUI() {
         addDispose {
@@ -53,6 +39,10 @@ abstract class BaseActivity<B : ViewDataBinding> : AppCompatActivity(), ViewInit
                 }
             }
         }
+    }
+
+    override fun initDpValue(){
+        dp = resources.displayMetrics.density
     }
 
     override fun onStart() {
